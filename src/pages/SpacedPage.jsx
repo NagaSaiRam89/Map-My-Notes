@@ -81,46 +81,56 @@ export default function SpacedPage({ flashcards, setFlashcards, streak, setStrea
 
   return (
     <AppLayout>
-      <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">🧠 Spaced Repetition</h2>
-          <div className="bg-white rounded-xl p-4 shadow flex flex-col gap-2 w-full sm:w-auto mb-4">
-            <h2 className="text-lg font-bold">🔥 Streak</h2>
-            <p>{Object.keys(streak || {}).length} days reviewed</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left Column: Controls and Form */}
+        <div className="md:col-span-1 space-y-6">
+          <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+            <h3 className="text-lg font-bold mb-2">🔥 Review Streak</h3>
+            <p className="text-gray-600">{Object.keys(streak || {}).length} days reviewed</p>
             <button
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-primary hover:underline mt-2"
               onClick={() => setShowCalendar(!showCalendar)}
             >
               {showCalendar ? 'Hide Calendar' : 'Show Calendar View'}
             </button>
-            {showCalendar && <CalendarView streak={streak} />}
+            {showCalendar && <div className="mt-4"><CalendarView streak={streak} /></div>}
           </div>
+          <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+            <h3 className="text-lg font-bold mb-2">➕ Add Flashcard</h3>
           <FlashcardForm onSubmit={handleAddCard} />
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Filter by tag..."
-              className="border px-2 py-1 text-sm rounded"
-              value={filterTag}
-              onChange={(e) => setFilterTag(e.target.value)}
-            />
           </div>
-          <p className="text-sm text-gray-600 mb-2">
-            {toReviewCards.length > 0
-              ? `📆 ${toReviewCards.length} card(s) due today`
-              : `✅ All reviews done for today!`}
-          </p>
-          <h3 className="text-lg font-semibold mt-4">📝 To Be Reviewed</h3>
-          <FlashcardReview cards={toReviewCards} onReview={handleReview} />
-          <div className="mt-4">
-             <label className="block mb-1 text-sm font-medium">Review again in:</label>
-             <IntervalPicker onSelect={handleIntervalSelect} />
-           </div>
-           {reviewedCards.length > 0 && (
-             <>
-               <h3 className="text-lg font-semibold mt-6">✅ Reviewed This Session</h3>
-               <FlashcardList cards={reviewedCards} onDelete={handleDeleteCard} />
-             </>
-           )}
+          <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+             <label htmlFor="filter-tag" className="block text-sm font-medium text-gray-700">Filter by Tag</label>
+             <input
+               id="filter-tag"
+               type="text"
+               placeholder="Enter tag..."
+               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+               value={filterTag}
+               onChange={(e) => setFilterTag(e.target.value)}
+             />
+          </div>
+        </div>
+
+        {/* Right Column: Review Area */}
+        <div className="md:col-span-2 space-y-6">
+          <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+            <h3 className="text-lg font-bold mb-2">📝 To Be Reviewed ({toReviewCards.length})</h3>
+            <FlashcardReview cards={toReviewCards} onReview={handleReview} />
+            {toReviewCards.length > 0 &&
+                <div className="mt-4 border-t pt-4">
+                    <label className="block mb-2 text-sm font-medium">Review again in:</label>
+                    <IntervalPicker onSelect={handleIntervalSelect} />
+                    </div>
+            }
+          </div>
+          {(reviewedCards.length > 0) && (
+            <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+              <h3 className="text-lg font-bold mb-2">✅ Reviewed This Session</h3>
+              <FlashcardList cards={reviewedCards} onDelete={handleDeleteCard} />
+              </div>
+          )}
+        </div>
       </div>
     </AppLayout>
   );

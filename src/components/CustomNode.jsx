@@ -1,17 +1,13 @@
 import React from 'react';
+import { Handle, Position } from 'reactflow';
 
-const CustomNode = ({ id, data }) => {
+export default function CustomNode({ data }) {
   return (
-    <div style={{ background: 'white', border: '1px solid #ccc', padding: '6px', borderRadius: '4px' }}>
-      <div>{data.label}</div>
-      <button
-        onClick={() => data.onDelete(id)}
-        style={{ fontSize: '10px', color: 'red', marginTop: '4px' }}
-      >
-        ✖ Delete
-      </button>
+    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
+      <div className="text-lg font-bold">{data.label}</div>
+
+      <Handle type="target" position={Position.Top} className="w-16 !bg-teal-500" />
+      <Handle type="source" position={Position.Bottom} className="w-16 !bg-teal-500" />
     </div>
   );
-};
-
-export default CustomNode;
+}

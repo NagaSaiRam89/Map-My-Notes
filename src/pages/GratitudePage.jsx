@@ -65,7 +65,7 @@ export default function GratitudePage({ gratitudeEntries, setGratitudeEntries })
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-3xl mx-auto">
+      {/* <div className="p-6 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">🌞 Daily Gratitude</h2>
         <div className="bg-yellow-50 p-4 rounded-md mb-4 border border-yellow-300">
           <p className="text-lg font-semibold">🔥 Current Streak: {streakData.currentStreak} day(s)</p>
@@ -77,19 +77,46 @@ export default function GratitudePage({ gratitudeEntries, setGratitudeEntries })
             {showCalendar ? 'Hide Calendar' : 'Show Calendar View'}
           </button>
           {showCalendar && <GratitudeCalendar entries={gratitudeEntries || []} />}
+        </div> */}
+        <div className="max-w-3xl mx-auto grid grid-cols-1 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+           <h3 className="text-lg font-bold mb-2">🔥 Your Gratitude Streak</h3>
+           <div className="flex items-center justify-between">
+              <div>
+                 <p>Current Streak: <span className="font-bold text-primary">{streakData.currentStreak} day(s)</span></p>
+                 <p>Longest Streak: <span className="font-bold">{streakData.longestStreak} day(s)</span></p>
+              </div>
+              <button
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="text-sm bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300"
+              >
+                {showCalendar ? 'Hide Calendar' : 'View Calendar'}
+              </button>
+           </div>
+           {showCalendar && <div className="mt-4"><GratitudeCalendar entries={gratitudeEntries || []} /></div>}
         </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <h3 className="text-lg font-bold mb-4">What are you grateful for today?</h3>
+            
         <GratitudeForm onSubmit={handleAddOrUpdateEntry} initialData={editingEntry} />
-        <div className="space-y-4 mt-6 max-h-[60vh] overflow-y-auto">
-          {(gratitudeEntries || []).map((entry) => (
-            <GratitudeEntry
-              key={entry.id}
-              entry={entry}
-              onEdit={setEditingEntry}
-              onDelete={handleDelete}
-            />
-          ))}
         </div>
-      </div>
-    </AppLayout>
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold">Past Entries</h3>
+          {(gratitudeEntries || []).length > 0 ? (
+            (gratitudeEntries || []).map((entry) => (
+              <GratitudeEntry
+                key={entry.id}
+                entry={entry}
+                onEdit={setEditingEntry}
+              onDelete={handleDelete}
+              />
+              ))
+            ) : (
+              <p className="text-gray-500 italic">No entries yet. Add one above to get started!</p>
+            )}
+          </div>
+        </div>
+      </AppLayout>
   );
 }

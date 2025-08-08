@@ -12,20 +12,22 @@ const tabs = [
 
 export default function AppLayout({ children }) {
   const location = useLocation();
-  const { driveConnected, login, logout } = useAuth();// Get login status and function
+  const { driveConnected, login, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
-      <header className="flex justify-between items-center px-6 py-4 ...">
-        {/* ... */}
-        <div className="flex gap-2 items-center">
+    <div className="min-h-screen bg-gray-100 font-sans">
+      {/* Header */}
+      <header className="flex justify-between items-center px-6 py-3 border-b bg-white shadow-sm">
+        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <span role="img" aria-label="brain">🧠</span> Map My Notes
+        </h1>
+        <div>
           {driveConnected ? (
-             // ✅ Show a Logout button when connected
-             <button onClick={() => logout()} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+             <button onClick={() => logout()} className="bg-danger text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-red-700 transition">
                Logout
              </button>
           ) : (
-            <button onClick={() => login()} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <button onClick={() => login()} className="bg-primary text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-purple-700 transition">
               Connect Google Drive
             </button>
           )}
@@ -33,15 +35,15 @@ export default function AppLayout({ children }) {
       </header>
 
       {/* Tabs */}
-      <nav className="flex gap-4 px-6 py-2 border-b bg-white">
+      <nav className="flex gap-2 px-6 bg-white border-b">
         {tabs.map(({ path, label }) => (
           <Link
             key={path}
             to={path}
-            className={`py-2 px-4 rounded-t-md font-medium ${
-              location.pathname.startsWith(path) // Use startsWith for dynamic routes
-                ? 'border-b-2 border-purple-600 text-purple-700'
-                : 'text-gray-600 hover:text-purple-700'
+            className={`py-3 px-2 text-sm font-semibold transition ${
+              location.pathname.startsWith(path)
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-gray-500 hover:text-primary'
             }`}
           >
             {label}

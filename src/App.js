@@ -87,7 +87,7 @@ function AppContent() {
           path="/concept-map"
           element={
             <ReactFlowProvider>
-              <ConceptMapPage notes={notes} />
+              <ConceptMapPage notes={notes} setNotes={setNotes} />
             </ReactFlowProvider>
           }
         />
@@ -95,7 +95,7 @@ function AppContent() {
           path="/concept-map/:mapId"
           element={
             <ReactFlowProvider>
-              <ConceptMapPage notes={notes} />
+              <ConceptMapPage notes={notes} setNotes={setNotes} />
             </ReactFlowProvider>
           }
         />
