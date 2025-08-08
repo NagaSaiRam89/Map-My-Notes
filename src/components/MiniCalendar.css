@@ -1,0 +1,11 @@
+.react-calendar {
+    font-size: 0.75rem;
+    max-width: 280px;
+  }
+  
+  .highlight-date {
+    background: #4ade80 !important; /* green-400 */
+    color: white !important;
+    border-radius: 50%;
+  }
+  

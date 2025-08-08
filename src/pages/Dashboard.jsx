@@ -1,127 +1,5 @@
 /* global gapi */
 
-let gapiInitialized = false;
-let folderId = null;
-let currentFileId = null;
-
-const FOLDER_NAME = 'Map My Notes';
-
-export const initGapiClient = (accessToken) =>
-  new Promise((resolve, reject) => {
-    if (gapiInitialized) return resolve();
-
-    window.gapi.load('client', async () => {
-      try {
-        await gapi.client.load('drive', 'v3');
-        await gapi.client.init({
-          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-        });
-        gapi.auth.setToken({ access_token: accessToken });
-        gapiInitialized = true;
-        resolve();
-      } catch (err) {
-        reject(err);
-      }
-    });
-  });
-
-export const ensureAppFolder = async () => {
-  const res = await gapi.client.drive.files.list({
-    q: `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-    fields: 'files(id, name)',
-  });
-
-  if (res.result.files.length > 0) {
-    folderId = res.result.files[0].id;
-  } else {
-    const folder = await gapi.client.drive.files.create({
-      resource: {
-        name: FOLDER_NAME,
-        mimeType: 'application/vnd.google-apps.folder',
-      },
-      fields: 'id',
-    });
-    folderId = folder.result.id;
-  }
-
-  return folderId;
-};
-
-// List all map files in the folder
-export const listFilesInFolder = async () => {
-  if (!folderId) await ensureAppFolder();
-
-  const res = await gapi.client.drive.files.list({
-    q: `'${folderId}' in parents and trashed=false and mimeType='application/json'`,
-    fields: 'files(id, name, modifiedTime)',
-    orderBy: 'modifiedTime desc',
-  });
-
-  return res.result.files; // [{ id, name, modifiedTime }]
-};
-
-// Save or update a file with given name
-export const saveToDrive = async (jsonData, fileName = 'untitled-map.json') => {
-  const fileContent = JSON.stringify(jsonData);
-  const blob = new Blob([fileContent], { type: 'application/json' });
-
-  // Find existing file by name
-  const existing = await gapi.client.drive.files.list({
-    q: `name='${fileName}' and '${folderId}' in parents and trashed=false`,
-    fields: 'files(id)',
-  });
-
-  const existingId = existing.result.files[0]?.id;
-  currentFileId = existingId || currentFileId;
-
-  const form = new FormData();
-  form.append(
-    'metadata',
-    new Blob(
-      [JSON.stringify({ name: fileName, mimeType: 'application/json', parents: existingId ? undefined : [folderId] })],
-      { type: 'application/json' }
-    )
-  );
-  form.append('file', blob);
-
-  const url = existingId
-    ? `https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=multipart`
-    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
-
-  const method = existingId ? 'PATCH' : 'POST';
-
-  const res = await fetch(url, {
-    method,
-    headers: new Headers({ Authorization: 'Bearer ' + gapi.auth.getToken().access_token }),
-    body: form,
-  });
-
-  const result = await res.json();
-  currentFileId = result.id;
-  return result;
-};
-
-// Load a map by file ID
-export const loadMapFile = async (fileId) => {
-  const res = await gapi.client.drive.files.get({
-    fileId,
-    alt: 'media',
-  });
-  currentFileId = fileId;
-  return res.result;
-};
-//Delete a map file by ID
-export const deleteMapFile = async (fileId) => {
-  try {
-    await gapi.client.drive.files.delete({
-      fileId,
-    });
-    return true;
-  } catch (err) {
-    console.error('Delete failed:', err);
-    return false;
-  }
-};
 
 import React, { useState, useRef, useEffect } from 'react';
 import MapCanvas from '../components/MapCanvas';
@@ -135,8 +13,11 @@ import {
   deleteMapFile,
 } from '../utils/GoogleDriveService';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const canvasRef = useRef();
 
   const handleOCRText = (text) => {
@@ -162,11 +43,12 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [driveConnected, selectedMap, availableMaps]);
 
-  
+  const { setAccessToken } = useAuth();
 
   const handleLogin = useGoogleLogin({
     scope: 'https://www.googleapis.com/auth/drive.file',
     onSuccess: async (tokenResponse) => {
+      setAccessToken(tokenResponse.access_token);
       await initGapiClient(tokenResponse.access_token);
       await ensureAppFolder();
       const maps = await listFilesInFolder();
@@ -205,6 +87,36 @@ export default function Dashboard() {
         <button onClick={handleLoad} className="bg-yellow-500 text-white px-3 py-1 rounded">
           📥 Load Map
         </button>
+   
+
+          <button
+            onClick={() => navigate('/gratitude')}
+            className="bg-pink-600 text-white px-3 py-1 rounded"
+          >
+            Go to Gratitude Page
+          </button>
+          <button
+            onClick={() => navigate('/spaced')}
+            className="bg-blue-600 text-white px-3 py-1 rounded"
+          >
+            Go to Spaced Repetition
+          </button>
+          <button
+            onClick={() => navigate('/notes')}
+            className="bg-orange-600 text-white px-3 py-1 rounded"
+          >
+            Go to Notes
+          </button>
+
+          <button
+            onClick={() => navigate('/map')}
+            className="bg-purple-600 text-white px-3 py-1 rounded"
+          >
+            go to maps
+          </button>
+        
+
+
       </div>
       {driveConnected && (
      <div className="flex gap-4 mt-4 items-center">
@@ -224,7 +136,6 @@ export default function Dashboard() {
         </option>
       ))}
     </select>
-
     <input
       placeholder="New map name"
       value={newMapName}

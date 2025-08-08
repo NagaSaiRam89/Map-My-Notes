@@ -32,6 +32,25 @@
   color: #61dafb;
 }
 
+.react-calendar-heatmap .color-filled {
+  fill: #fbbf24; /* Tailwind yellow-400 */
+}
+.react-calendar-heatmap .color-empty {
+  fill: #fefce8; /* Tailwind yellow-50 */
+}
+
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors;
+}
+.btn-secondary {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-700;
+}
+.btn-danger {
+  @apply bg-red-500 hover:bg-red-600 text-white;
+}
+
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
