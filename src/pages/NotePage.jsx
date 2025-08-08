@@ -1,92 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import NoteEditor from '../components/NoteEditor';
 import NoteList from '../components/NoteList';
-import { loadNotesFromDrive, saveNotesToDrive } from '../utils/notesUtils';
+import { saveNotesToDrive } from '../utils/GoogleDriveService'; // ✅ Changed path
 import AppLayout from '../components/AppLayout';
 
-export default function NotesPage() {
-  const [notes, setNotes] = useState([]);
+// ✅ FIX: Receive notes and setNotes as props from App.js
+export default function NotesPage({ notes, setNotes }) { 
   const [activeNote, setActiveNote] = useState(null);
 
-// inside NotesPage useEffect
-
-useEffect(() => {
-  async function loadNotes() {
-    const stored = await loadNotesFromDrive();
-
-    if (!Array.isArray(stored)) {
-      console.warn('❗ Invalid notes data loaded:', stored);
-      setNotes([]);
-      return;
+  // ✅ FIX: This useEffect now just sets the active note from the props
+  useEffect(() => {
+    // When the notes prop updates (e.g., after initial load), set the active note.
+    if (notes && notes.length > 0) {
+      const lastOpenedId = localStorage.getItem('activeNoteId');
+      const found = notes.find(n => n.id === lastOpenedId);
+      setActiveNote(found || notes[0]);
+    } else {
+      setActiveNote(null);
     }
-
-    setNotes(stored);
-
-    const lastOpenedId = localStorage.getItem('activeNoteId');
-    const found = stored.find(n => n.id === lastOpenedId);
-    setActiveNote(found || stored[0] || null);
-  }
-
-  loadNotes();
-}, []);
-
+  }, [notes]); // Run when the notes prop changes
 
   const handleNoteChange = (updatedNote) => {
-    const updated = notes.map(n => n.id === updatedNote.id ? updatedNote : n);
-    setNotes(updated);
+    const updatedNotes = notes.map(n => (n.id === updatedNote.id ? updatedNote : n));
+    setNotes(updatedNotes); // Update the state in App.js
     setActiveNote(updatedNote);
+    saveNotesToDrive(updatedNotes); 
   };
-
-  const handleSave = (noteToSave) => {
-    const updated = notes.map(n => n.id === noteToSave.id ? noteToSave : n);
-    setNotes(updated);
-    saveNotesToDrive(updated);
-  };
-  
 
   const handleAddNote = () => {
     const newNote = {
       id: Date.now().toString(),
-      title: '',
+      title: 'New Note',
       content: '',
       userKeywords: [],
       createdAt: new Date().toISOString(),
     };
-    const updated = [newNote, ...notes];
-    setNotes(updated);
+    const updatedNotes = [newNote, ...notes];
+    setNotes(updatedNotes); // Update the state in App.js
     setActiveNote(newNote);
-    saveNotesToDrive(updated);
+    saveNotesToDrive(updatedNotes);
   };
 
   const handleDeleteNote = (id) => {
-    const updated = notes.filter(n => n.id !== id);
-    setNotes(updated);
-    setActiveNote(updated[0] || null);
-    saveNotesToDrive(updated);
+    const updatedNotes = notes.filter(n => n.id !== id);
+    setNotes(updatedNotes); // Update the state in App.js
+    setActiveNote(updatedNotes[0] || null);
+    saveNotesToDrive(updatedNotes);
   };
 
   return (
     <AppLayout>
-    <div className="flex h-screen">
-      <NoteList
-        notes={notes}
-        activeId={activeNote?.id}
-        onSelect={setActiveNote}
-        onAdd={handleAddNote}
-        onDelete={handleDeleteNote}
-      />
-      <div className="flex-1">
-        {activeNote ? (
-          <NoteEditor
-            note={activeNote}
-            onChange={handleNoteChange}
-            onSave={handleSave}
-          />
-        ) : (
-          <div className="p-4 text-gray-500">Select or create a note.</div>
-        )}
+      <div className="flex h-[calc(100vh-120px)]">
+        <NoteList
+          notes={notes}
+          activeId={activeNote?.id}
+          onSelect={setActiveNote}
+          onAdd={handleAddNote}
+          onDelete={handleDeleteNote}
+        />
+        <div className="flex-1">
+          {activeNote ? (
+            <NoteEditor
+              key={activeNote.id}
+              note={activeNote}
+              onChange={handleNoteChange}
+            />
+          ) : (
+            <div className="p-4 text-gray-500">Select or create a note.</div>
+          )}
+        </div>
       </div>
-    </div>
     </AppLayout>
   );
 }

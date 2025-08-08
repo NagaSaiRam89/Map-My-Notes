@@ -1,49 +1,40 @@
-// src/pages/ConceptMapPage.jsx
-
 import React, { useEffect, useState, useCallback } from 'react';
+import { ReactFlowProvider } from 'reactflow';
+import ConceptMap from '../components/ConceptMap';
+import AppLayout from '../components/AppLayout';
 import {
   getAllMaps,
   createNewMap,
   loadMapFromDrive,
   saveMapToDrive,
-  ensureConceptFolder,
 } from '../utils/GoogleDriveService';
-import ConceptMap from '../components/ConceptMap';
-import AppLayout from '../components/AppLayout';
 
-const ConceptMapPage = () => {
+// ✅ FIX: Receive the 'notes' array as a prop from App.js
+export default function ConceptMapPage({ notes }) { 
   const [maps, setMaps] = useState([]);
   const [selectedMapId, setSelectedMapId] = useState(localStorage.getItem('selectedMapId') || '');
   const [mapData, setMapData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const loadMapList = useCallback(async () => {
-    await ensureConceptFolder();
-    const allMaps = await getAllMaps();
-    setMaps(allMaps);
+  // Load the list of available maps
+  useEffect(() => {
+    async function loadMapList() {
+      const allMaps = await getAllMaps();
+      setMaps(allMaps);
+    }
+    loadMapList();
   }, []);
 
+  // Load the data for the selected map
   useEffect(() => {
-    loadMapList();
-  }, [loadMapList]);
-
-  useEffect(() => {
-    const loadSelectedMap = async () => {
-      if (!selectedMapId) {
-        console.warn('No map selected. Skipping load.');
-        return;
-      }
-      try {
+    async function loadSelectedMap() {
+      if (selectedMapId) {
+        setLoading(true);
         const data = await loadMapFromDrive(selectedMapId);
-        if (!data || typeof data !== 'object') {
-          throw new Error('Invalid or empty map data');
-        }
         setMapData(data);
-      } catch (err) {
-        console.error('Failed to load selected map:', err);
-        setMapData({ title: '', nodes: [], edges: [] }); // fallback
+        setLoading(false);
       }
-    };
-
+    }
     loadSelectedMap();
   }, [selectedMapId]);
 
@@ -55,12 +46,10 @@ const ConceptMapPage = () => {
 
   const handleCreateMap = async () => {
     const title = prompt('Enter new map title:');
-    if (!title) return;
+    if (!title || !title.trim()) return;
     const newMap = await createNewMap(title);
-    await loadMapList();
-    setSelectedMapId(newMap.id);
-    localStorage.setItem('selectedMapId', newMap.id);
-    setMapData({ title, nodes: [], edges: [] });
+    setMaps(prev => [...prev, newMap]); // Add new map to the list
+    setSelectedMapId(newMap.id); // Automatically select the new map
   };
 
   const handleSave = async (updatedMapData) => {
@@ -70,32 +59,34 @@ const ConceptMapPage = () => {
 
   return (
     <AppLayout>
-    <div className="p-4 space-y-4">
-      <div className="flex gap-2">
-        <select className="border p-2" value={selectedMapId} onChange={handleMapChange}>
-          <option value="">Select a concept map</option>
-          {maps.map((map) => (
-            <option key={map.id} value={map.id}>
-              {map.name}
-            </option>
-          ))}
-        </select>
-        <button onClick={handleCreateMap} className="bg-green-500 text-white px-4 py-2 rounded">
-          + Create New Map
-        </button>
-      </div>
+      <div className="p-4 space-y-4">
+        <h2 className="text-2xl font-bold">🧠 Concept Map</h2>
+        <div className="flex gap-2 items-center">
+          <select className="border p-2 rounded" value={selectedMapId} onChange={handleMapChange}>
+            <option value="">Select a map</option>
+            {maps.map((map) => (
+              <option key={map.id} value={map.id}>{map.name}</option>
+            ))}
+          </select>
+          <button onClick={handleCreateMap} className="bg-green-500 text-white px-4 py-2 rounded">
+            + Create New Map
+          </button>
+        </div>
 
-      {selectedMapId && mapData && (
-        <ConceptMap
-          mapData={mapData}
-          setMapData={setMapData}
-          selectedMapId={selectedMapId}
-          onSave={handleSave}
-        />
-      )}
-    </div>
+        {loading && <div>Loading Map...</div>}
+
+        {!loading && selectedMapId && mapData && (
+          <ReactFlowProvider>
+            <ConceptMap
+              key={selectedMapId}
+              initialMapData={mapData}
+              notes={notes} // ✅ Pass the notes prop down to the canvas component
+              onSave={handleSave}
+              selectedMapId={selectedMapId}
+            />
+          </ReactFlowProvider>
+        )}
+      </div>
     </AppLayout>
   );
-};
-
-export default ConceptMapPage;
+}

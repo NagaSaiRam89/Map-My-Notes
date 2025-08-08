@@ -1,5 +1,4 @@
-// src/components/ConceptMap.jsx
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -7,131 +6,115 @@ import ReactFlow, {
   addEdge,
   useNodesState,
   useEdgesState,
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-
-import { loadNotesFromDrive, getNoteById } from '../utils/notesUtils';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
-import EditableEdge from './EditableEdge';
-import CustomNode from './CustomNode';
-
-const ConceptMap = ({ mapData, setMapData, selectedMapId, onSave }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(mapData.nodes || []);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(mapData.edges || []);
-
-  const [notes, setNotes] = useState([]);
-  const [keywords, setKeywords] = useState([]);
-  const [selectedNoteId, setSelectedNoteId] = useState(null);
+export default function ConceptMap({ initialMapData, notes, onSave, selectedMapId }) {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialMapData.nodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialMapData.edges || []);
+  const [selectedNoteIds, setSelectedNoteIds] = useState([]);
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const navigate = useNavigate();
 
-  const nodeTypes = useMemo(() => ({ custom: CustomNode }), []);
-  const edgeTypes = useMemo(() => ({ editable: EditableEdge }), []);
-
+  // Auto-save map when nodes or edges change (with debounce)
   useEffect(() => {
-    loadNotesFromDrive().then(setNotes);
-  }, []);
+    const handler = setTimeout(() => {
+      onSave({ ...initialMapData, nodes, edges });
+    }, 1000); // Save 1 second after last change
+    return () => clearTimeout(handler);
+  }, [nodes, edges, onSave, initialMapData]);
 
-  useEffect(() => {
-    setMapData((prev) => ({
-      ...prev,
-      nodes,
-      edges,
-    }));
-  }, [nodes, edges, setMapData]);
+  const availableKeywords = useMemo(() => {
+    const keywords = new Set();
+    notes
+      .filter(note => selectedNoteIds.includes(note.id))
+      .forEach(note => (note.userKeywords || []).forEach(k => keywords.add(k)));
+    return Array.from(keywords);
+  }, [selectedNoteIds, notes]);
 
-  const handleEdgeLabelChange = (id, label) => {
-    setEdges((edges) =>
-      edges.map((e) => (e.id === id ? { ...e, data: { ...e.data, label } } : e))
-    );
-  };
-
-  const onConnect = useCallback(
-    (params) => {
-      const newEdge = {
-        ...params,
-        type: 'editable',
-        data: { onChange: handleEdgeLabelChange },
-      };
-      setEdges((eds) => addEdge(newEdge, eds));
-    },
-    [setEdges]
-  );
-
-  const handleDeleteNode = (id) => {
-    setNodes((nds) => nds.filter((n) => n.id !== id));
-    setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
-  };
-
-  const handleNoteSelect = async (noteId) => {
-    setSelectedNoteId(noteId);
-    const note = notes.find((n) => n.id === noteId) || (await getNoteById(noteId));
-    setKeywords(note?.userKeywords || []);
+  const addKeywordsAsNodes = () => {
+    const existingNodeLabels = new Set(nodes.map(n => n.data.label));
+    const newNodes = selectedKeywords
+      .filter(kw => !existingNodeLabels.has(kw))
+      .map((kw, idx) => ({
+        id: `${kw}-${Date.now()}-${idx}`,
+        type: 'default',
+        position: { x: Math.random() * 400, y: Math.random() * 400 + 50 },
+        data: { label: kw },
+      }));
+    
+    setNodes(nds => [...nds, ...newNodes]);
+    toast.success(`${newNodes.length} new keyword(s) added as nodes!`);
     setSelectedKeywords([]);
   };
 
-  const addKeywords = () => {
-    let i = 0;
-    const newNodes = selectedKeywords.map((kw) => ({
-      id: `${kw}-${Date.now()}-${i++}`,
-      type: 'custom',
-      data: { label: kw, onDelete: handleDeleteNode },
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
-    }));
-    setNodes((nds) => [...nds, ...newNodes]);
-  };
+  const handleNodeClick = useCallback(
+    (event, node) => {
+      const keyword = node.data.label;
+      const found = notes.find(n => n.userKeywords?.includes(keyword) || n.title.includes(keyword));
 
-  const handleNodeClick = (e, node) => {
-    const keyword = node.data.label;
-    const note = notes.find((n) => (n.userKeywords || []).includes(keyword));
-    if (note) {
-      navigate(`/note/${note.id}?mapId=${selectedMapId}`);
-    }
-  };
+      if (found) {
+        navigate(`/note/${found.id}?mapId=${selectedMapId}`);
+      } else {
+        // Here you could create a new note if you want
+        toast.error(`No note found for keyword: "${keyword}"`);
+      }
+    },
+    [notes, navigate, selectedMapId]
+  );
+
+  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   return (
-    <div style={{ display: 'flex', height: '100%' }}>
-      <div style={{ width: 220, padding: 10, overflowY: 'auto', borderRight: '1px solid #ccc' }}>
-        <h3>Select Note</h3>
-        <select onChange={(e) => handleNoteSelect(e.target.value)} value={selectedNoteId || ''}>
-          <option value="">-- Select Note --</option>
-          {notes.map((n) => (
-            <option key={n.id} value={n.id}>
-              {n.title}
-            </option>
+    <div className="flex h-[75vh]">
+      {/* Sidebar for keyword extraction */}
+      <div className="w-72 p-4 border-r space-y-4">
+        <h3 className="font-semibold">Extract from Notes</h3>
+        <select
+          multiple
+          value={selectedNoteIds}
+          onChange={(e) => setSelectedNoteIds(Array.from(e.target.selectedOptions, o => o.value))}
+          className="w-full border p-2 h-40"
+        >
+          {notes.map(note => (
+            <option key={note.id} value={note.id}>{note.title || 'Untitled'}</option>
           ))}
         </select>
 
-        {keywords.length > 0 && (
-          <>
-            <h4>Keywords</h4>
-            <div style={{ maxHeight: 150, overflowY: 'auto' }}>
-              {keywords.map((kw) => (
-                <label key={kw} style={{ display: 'block' }}>
+        {availableKeywords.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Select Keywords</h4>
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border p-2 rounded">
+              {availableKeywords.map(kw => (
+                <label key={kw} className="flex items-center gap-1 cursor-pointer">
                   <input
                     type="checkbox"
                     value={kw}
                     checked={selectedKeywords.includes(kw)}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setSelectedKeywords((prev) =>
-                        prev.includes(v) ? prev.filter((k) => k !== v) : [...prev, v]
-                      );
-                    }}
+                    onChange={() => setSelectedKeywords(prev => 
+                      prev.includes(kw) ? prev.filter(k => k !== kw) : [...prev, kw]
+                    )}
                   />
                   {kw}
                 </label>
               ))}
             </div>
-            <button onClick={addKeywords} disabled={selectedKeywords.length === 0}>
-              ➕ Add Keywords as Nodes
+            <button
+              onClick={addKeywordsAsNodes}
+              className="w-full bg-blue-500 text-white px-3 py-1 rounded"
+              disabled={selectedKeywords.length === 0}
+            >
+              Add to Map
             </button>
-          </>
+          </div>
         )}
       </div>
 
-      <div style={{ flexGrow: 1 }}>
+      {/* React Flow Canvas */}
+      <div className="flex-1">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -140,16 +123,12 @@ const ConceptMap = ({ mapData, setMapData, selectedMapId, onSave }) => {
           onConnect={onConnect}
           onNodeClick={handleNodeClick}
           fitView
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
         >
-          <MiniMap />
-          <Controls />
           <Background />
+          <Controls />
+          <MiniMap />
         </ReactFlow>
       </div>
     </div>
   );
-};
-
-export default ConceptMap;
+}

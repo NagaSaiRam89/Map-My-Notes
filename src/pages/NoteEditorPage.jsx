@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import NoteEditor from '../components/NoteEditor';
 import { getAllNotes } from '../utils/GoogleDriveService';
-import { saveNotesToDrive } from '../utils/notesUtils'; 
+import { saveNotesToDrive } from '../utils/GoogleDriveService'; 
 import AppLayout from '../components/AppLayout';
 
 export default function NoteEditorPage() {

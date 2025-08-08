@@ -1,85 +1,52 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { extractKeywords } from '../utils/keywordUtils';
-import { loadMapFromDrive, saveMapToDrive } from '../utils/conceptMapUtils';
 import OCRUpload from './OCRUpload';
+// Note: We no longer need to import concept map utilities here
 
-export default function NoteEditor({ note, onChange, onSave }) {
+export default function NoteEditor({ note, onChange }) {
   const [selectedKeyword, setSelectedKeyword] = useState(null);
   const textareaRef = useRef(null);
 
+  // This is a computed value, it will update when note.content changes
   const keywords = extractKeywords(note?.content);
 
-  // ✅ Select a keyword from highlight + press K
+  // Effect for handling the "K" shortcut to add keywords
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key.toLowerCase() === 'k') {
-        e.preventDefault(); // Prevent "k" from being typed
-  
+        let keywordToAdd = null;
         const textarea = textareaRef.current;
-        const currentKeywords = new Set(note.userKeywords || []);
-  
-        // ✅ If selecting text in the textarea
-        if (textarea && document.activeElement === textarea) {
-          const selectedText = textarea.value
-            .substring(textarea.selectionStart, textarea.selectionEnd)
-            .trim();
-  
-          if (selectedText && !currentKeywords.has(selectedText)) {
-            currentKeywords.add(selectedText);
-  
-            const updated = {
-              ...note,
-              userKeywords: Array.from(currentKeywords),
-            };
-            onChange(updated);
-          }
+
+        // Check for text selected inside the textarea
+        if (textarea && document.activeElement === textarea && textarea.selectionStart !== textarea.selectionEnd) {
+          keywordToAdd = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
+        } 
+        // Check for a selected keyword chip
+        else if (selectedKeyword) {
+          keywordToAdd = selectedKeyword;
         }
-        // ✅ Or if `selectedKeyword` exists
-        else if (selectedKeyword && !currentKeywords.has(selectedKeyword)) {
-          currentKeywords.add(selectedKeyword);
-  
-          const updated = {
+
+        if (keywordToAdd && !note.userKeywords?.includes(keywordToAdd)) {
+          e.preventDefault(); // Prevent 'k' from being typed
+          const updatedNote = {
             ...note,
-            userKeywords: Array.from(currentKeywords),
+            userKeywords: [...(note.userKeywords || []), keywordToAdd],
           };
-          onChange(updated);
+          onChange(updatedNote); // Send the updated note to the parent
         }
       }
     };
-  
+
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [selectedKeyword, note, onChange]);
-  
-  const handlePromoteToMap = async () => {
-    if (!note) return;
-    const conceptMap = await loadMapFromDrive();
-    const existingNodes = conceptMap.nodes.map((n) => n.label);
-
-    const newNodes = (note.userKeywords || [])
-      .filter((k) => !existingNodes.includes(k))
-      .map((k) => ({
-        id: `n-${Date.now()}-${k}`,
-        label: k,
-        x: Math.random() * 500,
-        y: Math.random() * 500,
-      }));
-
-    const updatedMap = {
-      ...conceptMap,
-      nodes: [...conceptMap.nodes, ...newNodes],
-    };
-
-    await saveMapToDrive(updatedMap);
-    alert('✔️ Keywords synced to concept map');
-  };
 
   const handleOCRExtracted = (text) => {
-    const updated = {
+    const updatedNote = {
       ...note,
       content: (note.content || '') + '\n' + text,
     };
-    onChange(updated);
+    onChange(updatedNote);
   };
 
   if (!note) {
@@ -95,7 +62,7 @@ export default function NoteEditor({ note, onChange, onSave }) {
       <input
         type="text"
         placeholder="Note Title"
-        className="w-full p-2 border rounded font-semibold"
+        className="w-full p-2 border rounded font-semibold text-lg"
         value={note.title || ''}
         onChange={(e) => onChange({ ...note, title: e.target.value })}
       />
@@ -109,9 +76,9 @@ export default function NoteEditor({ note, onChange, onSave }) {
         placeholder="Start typing your note..."
       />
 
-      {/* Keywords */}
+      {/* Keywords Display */}
       <div className="mt-1 text-sm text-gray-600">
-        <strong>Extracted Keywords (click + press K):</strong>
+        <strong>Extracted Keywords (click or select text + press K):</strong>
         <div className="flex flex-wrap gap-2 mt-1">
           {keywords.map((k, idx) => (
             <span
@@ -129,7 +96,7 @@ export default function NoteEditor({ note, onChange, onSave }) {
         </div>
       </div>
 
-      {/* Added Tags */}
+      {/* Added Tags Display */}
       {note.userKeywords?.length > 0 && (
         <div className="mt-1 text-sm text-green-600">
           <strong>Added Tags:</strong>
@@ -142,23 +109,6 @@ export default function NoteEditor({ note, onChange, onSave }) {
           </div>
         </div>
       )}
-      {/* save button */}
-
-      <button
-        onClick={() => onSave(note)}
-        className="bg-green-600 text-white text-sm px-3 py-1 rounded hover:bg-green-700 self-start mt-2"
-      >
-        💾 Save Note
-      </button>
-
-
-      {/* Sync Button */}
-      <button
-        onClick={handlePromoteToMap}
-        className="bg-purple-600 text-white text-sm px-3 py-1 rounded hover:bg-purple-700 self-start"
-      >
-        Sync Tags to Concept Map
-      </button>
     </div>
   );
 }
