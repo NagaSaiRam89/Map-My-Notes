@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Import the useAuth hook
+import { useAuth } from '../context/AuthContext'; 
 
-// The tabs paths should match your App.js routes exactly
 const tabs = [
   { path: '/notes', label: 'Notes' },
   { path: '/concept-map', label: 'Concept Map' },
