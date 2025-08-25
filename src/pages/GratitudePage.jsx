@@ -65,19 +65,7 @@ export default function GratitudePage({ gratitudeEntries, setGratitudeEntries })
 
   return (
     <AppLayout>
-      {/* <div className="p-6 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">🌞 Daily Gratitude</h2>
-        <div className="bg-yellow-50 p-4 rounded-md mb-4 border border-yellow-300">
-          <p className="text-lg font-semibold">🔥 Current Streak: {streakData.currentStreak} day(s)</p>
-          <p className="text-sm text-gray-600">🏆 Longest Streak: {streakData.longestStreak} day(s)</p>
-          <button
-            onClick={() => setShowCalendar(!showCalendar)}
-            className="mt-2 px-3 py-1 text-sm bg-yellow-400 text-white rounded hover:bg-yellow-500"
-          >
-            {showCalendar ? 'Hide Calendar' : 'Show Calendar View'}
-          </button>
-          {showCalendar && <GratitudeCalendar entries={gratitudeEntries || []} />}
-        </div> */}
+      
         <div className="max-w-3xl mx-auto grid grid-cols-1 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
            <h3 className="text-lg font-bold mb-2">🔥 Your Gratitude Streak</h3>
