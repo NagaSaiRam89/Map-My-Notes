@@ -14,19 +14,19 @@ const Home = () => {
           onClick={() => navigate('/daily-gratitude')}
           className="btn bg-pink-500 hover:bg-pink-600 text-white"
         >
-          ❤️ Start Daily Gratitude
+           Start Daily Gratitude
         </button>
         <button
           onClick={() => navigate('/concept-map')}
           className="btn bg-blue-500 hover:bg-blue-600 text-white"
         >
-          🧩 Open Concept Map
+           Open Concept Map
         </button>
         <button
           onClick={() => navigate('/spaced-learning')}
           className="btn bg-green-500 hover:bg-green-600 text-white"
         >
-          💡 Spaced Learning
+           Spaced Learning
         </button>
       </div>
       </div>
