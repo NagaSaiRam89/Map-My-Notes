@@ -86,9 +86,7 @@ async function createInitialFile(fileName, folderId, initialContent = '[]') {
   return result.id;
 }
 
-// ========================================================================
 // Concept Map Utilities
-// ========================================================================
 const MAPS_PATH = 'Map My Notes/ConceptMaps';
 
 export async function getAllMaps() {
@@ -130,9 +128,7 @@ export async function createNewMap(title) {
   return { id: file.result.id, name: file.result.name };
 }
 
-// ========================================================================
 // Notes Utilities
-// ========================================================================
 const NOTES_PATH = 'Map My Notes/Notes';
 async function getNotesFileId() {
   const folderId = await ensureFolderByPath(NOTES_PATH);
@@ -159,9 +155,7 @@ export async function saveNotesToDrive(notes) {
   }
 }
 
-// ========================================================================
 // Gratitude Utilities
-// ========================================================================
 const GRATITUDE_PATH = 'Map My Notes/Gratitude';
 async function getGratitudeFileId() {
   const folderId = await ensureFolderByPath(GRATITUDE_PATH);
@@ -188,9 +182,7 @@ export async function saveGratitudeEntries(entries) {
   }
 }
 
-// ========================================================================
 // Spaced Repetition Utilities
-// ========================================================================
 const SPACED_REP_PATH = 'Map My Notes/SpacedRep';
 async function getSpacedRepFileId(fileName) {
   const folderId = await ensureFolderByPath(SPACED_REP_PATH);
@@ -234,9 +226,7 @@ export async function saveStreak(data) {
   }
 }
 
-// ========================================================================
 // Legacy / Dashboard Utilities (for backwards compatibility)
-// ========================================================================
 export const ensureAppFolder = () => ensureFolderByPath('Map My Notes');
 
 export const listFilesInFolder = async () => {
