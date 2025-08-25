@@ -37,7 +37,7 @@ export default function Dashboard() {
     const interval = setInterval(async () => {
       const data = canvasRef.current.getMapData();
       await saveToDrive(data, availableMaps.find(m => m.id === selectedMap)?.name);
-      console.log('Auto-saved map ✅');
+      console.log('Auto-saved map ');
     }, 60000); // every 60 seconds
   
     return () => clearInterval(interval);
@@ -61,13 +61,13 @@ export default function Dashboard() {
   const handleSave = async () => {
     const data = canvasRef.current.getMapData();
     await saveToDrive(data);
-    alert('Saved to Google Drive ✅');
+    alert('Saved to Google Drive ');
   };
 
   const handleLoad = async () => {
     const cloudData = await loadMapFile(selectedMap);
     canvasRef.current.setMapData(cloudData);
-    alert('Loaded from Drive 📥');
+    alert('Loaded from Drive ');
   };
 
   
@@ -79,13 +79,13 @@ export default function Dashboard() {
 
       <div className="flex gap-4">
         <button onClick={handleLogin} className="bg-blue-600 text-white px-3 py-1 rounded">
-          🔐 Connect Google Drive
+           Connect Google Drive
         </button>
         <button onClick={handleSave} className="bg-green-600 text-white px-3 py-1 rounded">
-          ☁️ Save Map
+           Save Map
         </button>
         <button onClick={handleLoad} className="bg-yellow-500 text-white px-3 py-1 rounded">
-          📥 Load Map
+           Load Map
         </button>
    
 
@@ -150,10 +150,10 @@ export default function Dashboard() {
         const updated = await listFilesInFolder();
         setAvailableMaps(updated);
         setNewMapName('');
-        alert('New map saved ✅');
+        alert('New map saved ');
       }}
     >
-      ➕ Create & Save
+       Create & Save
     </button>
   </div>
 )}
@@ -167,7 +167,7 @@ export default function Dashboard() {
       await deleteMapFile(selectedMap);
       setAvailableMaps(await listFilesInFolder());
       setSelectedMap(null);
-      alert('Map deleted ❌');
+      alert('Map deleted ');
     }}
   >
     🗑 Delete
