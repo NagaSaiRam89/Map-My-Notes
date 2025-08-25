@@ -50,7 +50,7 @@ function AppContent() {
           setGratitudeEntries(Array.isArray(gratitudeData) ? gratitudeData : []);
           setStreak(streakData || {});
           
-          console.log("✅ All user data loaded from Google Drive.");
+          console.log(" All user data loaded from Google Drive.");
 
         } catch (error) {
           console.error("Failed to load data after login:", error);
@@ -65,7 +65,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Navigate to="/notes" />} />
 
-        {/* ✅ Pass the centrally managed state down to each page as props */}
+        {/*  Pass the centrally managed state down to each page as props */}
         <Route 
           path="/notes" 
           element={<NotesPage notes={notes} setNotes={setNotes} />} 
