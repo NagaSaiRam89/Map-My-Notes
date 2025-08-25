@@ -38,7 +38,7 @@ export default function NoteEditorPage() {
 
   const handleSave = async (updatedNote) => {
     await saveNotesToDrive(updatedNote);
-    alert('✅ Note saved');
+    alert(' Note saved');
   };
 
   if (loading) return <div className="p-4">Loading note...</div>;
