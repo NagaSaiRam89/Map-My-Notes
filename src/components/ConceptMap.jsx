@@ -23,8 +23,8 @@ export default function ConceptMap({ initialMapData, notes, setNotes, onSave, se
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [menu, setMenu] = useState(null);
   const navigate = useNavigate();
-  const [savingStatus, setSavingStatus] = useState('Saved'); // ✅ NEW: State for save indicator
-  const { screenToFlowPosition } = useReactFlow(); // ✅ NEW: Hook for coordinate conversion
+  const [savingStatus, setSavingStatus] = useState('Saved'); 
+  const { screenToFlowPosition } = useReactFlow(); 
   const nodeTypes = useMemo(() => ({
     default: CustomNode, // Set your custom node as the default
   }), []);
@@ -159,7 +159,7 @@ export default function ConceptMap({ initialMapData, notes, setNotes, onSave, se
       <div className="w-80 p-4 border-r space-y-4 overflow-y-auto">
         <div>
           <h3 className="font-semibold mb-2">Map Controls</h3>
-           {/* ✅ NEW: Save Status Indicator */}
+           {/* Save Status Indicator */}
            <div className="text-xs text-gray-500 mb-2">
             Status: 
             {savingStatus === 'Saving...' && <span className="text-yellow-500"> Saving...</span>}
