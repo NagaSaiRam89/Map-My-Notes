@@ -1,70 +1,122 @@
-# Getting Started with Create React App
+# Map My Notes 🧠
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern web application that transforms linear notes into interactive concept maps, integrating spaced repetition and other learning science principles to help you learn, connect, and retain knowledge more effectively.
 
-## Available Scripts
+**Live Demo:** [https://map-my-notes.vercel.app/](https://map-my-notes.vercel.app/)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## The Problem
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Traditional note-taking is often inefficient. Information is scattered across documents, making it hard to see the connections between ideas and even harder to remember what you've learned. Most tools are built for storing information, not for learning it.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## The Solution
 
-### `npm test`
+Map My Notes solves this by creating a single, integrated environment that combines:
+* **Visual Organization:** Turn your notes into visual knowledge networks.
+* **Proven Learning Science:** Use spaced repetition to commit information to long-term memory.
+* **Secure, Private Storage:** All your data is saved directly and securely in your own Google Drive.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Key Features
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* **📝 Notes Module:**
+    * Create, edit, and manage your notes in a clean interface.
+    * **OCR Integration:** Upload an image of handwritten notes, and the app will automatically extract the text.
+    * **Keyword Tagging:** Select any text in a note and press `K` to tag it as a keyword.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* **🧠 Interactive Concept Map:**
+    * Create and manage multiple concept maps.
+    * Pull keywords directly from your notes to create visual nodes.
+    * Create, edit, and delete nodes and the connections (edges) between them.
+    * Click on any node to instantly open the related note.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* **💡 Spaced Repetition System:**
+    * Create flashcards from your notes.
+    * The app generates a daily review queue based on a spaced repetition algorithm.
+    * Mark cards as "Remembered" or "Forgot" to automatically schedule their next review.
 
-### `npm run eject`
+* **🌞 Daily Gratitude Journal:**
+    * A simple feature to help build a consistent, positive daily habit.
+    * Tracks your current and longest streaks.
+    * Visualizes your activity on a calendar heatmap.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+* **☁️ Google Drive Integration:**
+    * Securely log in with your Google Account.
+    * All your data (notes, maps, flashcards) is saved automatically to an organized folder in your own Google Drive.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
+```
+## Screenshots
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+*(Note: Replace these placeholder links with direct links to your uploaded images on GitHub)*
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+| Notes Editor | Concept Map | Spaced Repetition | Daily Gratitude |
+| :---: | :---: | :---: | :---: |
+| ![Notes Editor](URL_TO_YOUR_NOTES_SCREENSHOT) | ![Concept Map](URL_TO_YOUR_MAP_SCREENSHOT) | ![Spaced Repetition](URL_TO_YOUR_SPACED_REP_SCREENSHOT) | ![Daily Gratitude](URL_TO_YOUR_GRATITUDE_SCREENSHOT) |
+```
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Tech Stack
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+* **Frontend:** React.js (with Hooks & JSX)
+* **Routing:** React Router DOM
+* **Styling:** Tailwind CSS
+* **Authentication:** Google OAuth 2.0 (`@react-oauth/google`)
+* **Data Persistence:** Google Drive API v3
+* **Concept Map Canvas:** `@xyflow/react` (React Flow)
+* **OCR:** Tesseract.js
+* **State Management:** React Context API & `useState`, `useEffect`
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Local Development Setup
 
-### Analyzing the Bundle Size
+To run this project locally, follow these steps:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/your-username/map-my-notes.git](https://github.com/your-username/map-my-notes.git)
+    cd map-my-notes
+    ```
 
-### Making a Progressive Web App
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+3.  **Set up Google Cloud credentials:**
+    * Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    * Create a new project.
+    * Go to "APIs & Services" > "Credentials" and create an "OAuth 2.0 Client ID" for a Web application.
+    * Add `http://localhost:3000` to both "Authorized JavaScript origins" and "Authorized redirect URIs".
+    * Copy your Client ID.
 
-### Advanced Configuration
+4.  **Add your Client ID to the project:**
+    * Open `src/index.js`.
+    * Replace the placeholder `clientId` in the `<GoogleOAuthProvider>` with your own.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+5.  **Run the development server:**
+    ```bash
+    npm start
+    ```
+    The application will be available at `http://localhost:3000`.
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Future Plans
 
-### `npm run build` fails to minify
+* **AI Integration:**
+    * AI-powered note summarization.
+    * Intelligent suggestions for linking concepts on the map.
+    * Automatic flashcard generation from notes.
+* **Real-time Collaboration:** Allow multiple users to edit a concept map together.
+* **Public Sharing:** Add the ability to share a read-only version of a note or concept map via a public link.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+## License
+
+This project is licensed under the MIT License.
