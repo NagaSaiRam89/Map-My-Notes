@@ -10,6 +10,7 @@ import SpacedPage from './pages/SpacedPage';
 import NotesPage from './pages/NotePage';
 import ConceptMapPage from './pages/ConceptMapPage';
 import NoteEditorPage from './pages/NoteEditorPage';
+import LandingPage from './pages/LandingPage';
 
 // Import ALL data loaders from your single service file
 import {
@@ -63,7 +64,7 @@ function AppContent() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/notes" />} />
+        <Route path="/" element={<LandingPage />} />
 
         {/*  Pass the centrally managed state down to each page as props */}
         <Route 
